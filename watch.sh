@@ -1,33 +1,49 @@
 #!/bin/bash
 
-# Check if an argument was provided
-# if [ $# -eq 0 ]; then
-#     echo "Error: no argument provided"
-#     exit 1
-# fi
-
+# Check if nodemon is installed
 command -v nodemon >/dev/null 2>&1 || { echo >&2 "nodemon is required but not installed. Aborting. (npm install -g nodemon)"; exit 1; }
 
 folder="./bin"
 
-# Memeriksa apakah folder ada
+# Check if the bin folder exists
 if [ ! -d "$folder" ]; then
-    # Jika tidak ada, maka buat folder
+    # If not, create the folder
     mkdir "$folder"
     echo "Folder $folder telah dibuat."
 fi
 
-files=( $(ls ./src | sort -n) )
-select filename in "${files[@]}"; do
-    if [[ -n $filename ]]; then
-        echo "Running Nodemon $filename..."
-        base=$(basename "$filename" .cpp)
-        # Run nodemon with clang++ to compile and execute the C++ program
-        nodemon --ext cpp --exec "g++ ./src/$filename -o ./bin/$base && ./bin/$base"
-        break
+# Get a list of subfolders in ./src
+subfolders=( ./src/*/ )
+echo "Silakan pilih folder yang ingin dijalankan:"
+
+select subfolder in "${subfolders[@]}"; do
+    if [[ -n $subfolder ]]; then
+        echo "Mengolah folder: $subfolder"
+        
+        # Get .cpp files in the selected subfolder
+        files=( "$subfolder"*.cpp )
+        
+        # Check if there are any .cpp files
+        if [ ${#files[@]} -eq 0 ]; then
+            echo "Tidak ada file .cpp di folder ini."
+            break
+        fi
+        
+        echo "Silakan pilih file latihan yang ingin dijalankan:"
+        select filename in "${files[@]}"; do
+            if [[ -n $filename ]]; then
+                echo "Running Nodemon on $(basename "$filename")..."
+                base=$(basename "$filename" .cpp)
+                # Run nodemon with g++ to compile and execute the C++ program
+                nodemon --ext cpp --exec "g++ \"$filename\" -o \"$folder/$base\" && \"$folder/$base\""
+                break
+            else
+                echo "Pilihan tidak valid."
+            fi
+        done
+        
+        break  # Exit the folder selection loop
     else
-        echo "Invalid selection."
+        echo "Pilihan tidak valid."
     fi
-  done
-
-
+done
