@@ -15,5 +15,6 @@ int main() {
     Employee employee;
     employee.setSalary(10000000);
     std::cout << employee.getSalary() << std::endl;
+    std.cout<< "Hello World!" << std.endl;
     return 0;
 }
